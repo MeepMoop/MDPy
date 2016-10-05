@@ -13,9 +13,9 @@ mdp = MDP()
 # add 2 states
 mdp.add_states(2)
 
-# add 1 action to the first state and 2 actions to the second state
-mdp.add_actions(0, 1)
-mdp.add_actions(1, 2)
+# add 2 actions to the first state and 1 action to the second state
+mdp.add_actions(0, 2)
+mdp.add_actions(1, 1)
 
 # add transitions (s', r, P) for each state-action pair
 mdp.add_transition(0, 0, (0, 1.0, 1.0))
