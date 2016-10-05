@@ -25,8 +25,8 @@ mdp.add_transition(1, 0, (0, 5.0, 0.6))
 mdp.add_transition(1, 0, (1, -1.0, 0.4))
 
 # output optimal state-value and action-value functions with discount rate 0.9
-print 'V[s]   ', mdp.value_iteration(0.9, 1e-6)
-print 'Q[s][a]', mdp.Q_iteration(0.9, 1e-6)
+print 'V[s]   ', mdp.value_iteration(0.9)
+print 'Q[s][a]', mdp.Q_iteration(0.9)
 ```
 ```
 V[s]    [7.858262284624602, 10.692908326840795]
