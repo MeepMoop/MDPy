@@ -18,11 +18,11 @@ mdp.add_actions(0, 2)
 mdp.add_actions(1, 1)
 
 # add transitions (s', r, P) for each state-action pair
-mdp.add_transition(0, 0, (0, 1.0, 1.0))
+mdp.add_transition(0, 0, (0, 0.5, 1.0))
 mdp.add_transition(0, 1, (0, -1.0, 0.25))
 mdp.add_transition(0, 1, (1, -1.0, 0.75))
-mdp.add_transition(1, 0, (0, 5.0, 0.5))
-mdp.add_transition(1, 0, (1, -2.0, 0.5))
+mdp.add_transition(1, 0, (0, 2.5, 0.5))
+mdp.add_transition(1, 0, (1, -1.0, 0.5))
 
 # output optimal value and action-value functions
 print 'V[s]   ', mdp.value_iteration(0.9, 1e-6)
