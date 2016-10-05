@@ -1,6 +1,6 @@
 # MDPy
 
-MDPy is an MDP library for Python. It allows for the creation of arbitrary MDPs, simulating actions in then, and solving them through implementations of policy evaluation and value iteration (for both state-values and action-values).
+MDPy is a simple MDP library for Python. It allows for the creation of arbitrary MDPs, simulating actions in then, and solving them through implementations of policy evaluation and value iteration (for both state-values and action-values).
 
 # Usage
 
