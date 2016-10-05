@@ -74,7 +74,7 @@ class MDP:
         return (self._mdp[state][action][tr][0], self._mdp[state][action][tr][1])
 
   # returns an array containing the optimal value function for an MDP
-  def value_iteration(self, gamma, tolerance):
+  def value_iteration(self, gamma, tolerance=1e-6):
     v = [0.0] * self.num_states()
     dv = tolerance
     while dv >= tolerance:
@@ -98,7 +98,7 @@ class MDP:
     return v
 
   # returns an array containing the optimal value function under a policy P[s][a] for an MDP
-  def value_policy(self, P, gamma, tolerance):
+  def value_policy(self, P, gamma, tolerance=1e-6):
     v = [0.0] * self.num_states()
     dv = tolerance
     while dv >= tolerance:
@@ -116,7 +116,7 @@ class MDP:
     return v
 
   # returns an array containing the optimal value function under the equiprobable random policy for an MDP
-  def value_equiprobable(self, gamma, tolerance):
+  def value_equiprobable(self, gamma, tolerance=1e-6):
     v = [0.0] * self.num_states()
     dv = tolerance
     while dv >= tolerance:
@@ -134,15 +134,15 @@ class MDP:
     return v
 
   # returns an array Q[s][a] containing the optimal action-value function for an MDP
-  def Q_iteration(self, gamma, tolerance):
+  def Q_iteration(self, gamma, tolerance=1e-6):
     return self.value_to_Q(self.value_iteration(gamma, tolerance), gamma)
 
   # returns an array Q[s][a] containing the optimal value function under a policy P[s][a] for an MDP
-  def Q_policy(self, P, gamma, tolerance):
+  def Q_policy(self, P, gamma, tolerance=1e-6):
     return self.value_to_Q(self.value_policy(P, gamma, tolerance), gamma)
 
   # returns an array Q[s][a] containing the optimal value function under the equiprobable random policy for an MDP
-  def Q_equiprobable(self, gamma, tolerance):
+  def Q_equiprobable(self, gamma, tolerance=1e-6):
     return self.value_to_Q(self.value_equiprobable(gamma, tolerance), gamma)
 
   # returns an array Q[s][a] for an MDP given a value function and discount rate
@@ -175,8 +175,8 @@ def example():
   mdp.add_transition(1, 0, (1, -1.0, 0.4))
 
   # output optimal value and action-value functions
-  print 'V[s]   ', mdp.value_iteration(0.9, 1e-6)
-  print 'Q[s][a]', mdp.Q_iteration(0.9, 1e-6)
+  print 'V[s]   ', mdp.value_iteration(0.9)
+  print 'Q[s][a]', mdp.Q_iteration(0.9)
 
 if __name__ == '__main__':
   example()
