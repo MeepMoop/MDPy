@@ -127,7 +127,7 @@ class MDP:
         for a in range(self.num_actions(s)):
           for tr in range(self.num_transitions(s, a)):
             tr_i = self._mdp[s][a][tr]
-            ret += (1 / self.num_actions(s)) * tr_i[2] * (tr_i[1] + gamma * v[tr_i[0]])
+            ret += (1 / float(self.num_actions(s))) * tr_i[2] * (tr_i[1] + gamma * v[tr_i[0]])
         v[s] = ret
         if abs(v[s] - vi[s]) > dv:
           dv = abs(v[s] - vi[s])
