@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 from random import random
 
-class MDP:
+class MDP(object):
   def __init__(self):
     self._mdp = []
 
@@ -67,7 +67,7 @@ class MDP:
   def do_action(self, state, action):
     P = self.get_probabilities(state, action)
     sample = random()
-    thresh = 0
+    thresh = 0.0
     for tr in range(len(P)):
       thresh += P[tr]
       if sample < thresh:
@@ -115,6 +115,32 @@ class MDP:
           dv = abs(v[s] - vi[s])
     return v
 
+  # returns an array containing the optimal value function under the epsilon-greedy policy for an MDP
+  def value_eps_greedy(self, epsilon, gamma, tolerance=1e-6):
+    v = [0.0] * self.num_states()
+    dv = tolerance
+    while dv >= tolerance:
+      dv = 0.0
+      vi = list(v)
+      for s in range(self.num_states()):
+        if self.num_actions(s) == 0:
+          v[s] = 0.0
+        else:
+          ret_max = -1000000.0
+          ret = 0.0
+          for a in range(self.num_actions(s)):
+            ret_a = 0.0
+            for tr in range(self.num_transitions(s, a)):
+              tr_i = self._mdp[s][a][tr]
+              ret_a += tr_i[2] * (tr_i[1] + gamma * v[tr_i[0]])
+            if ret_a > ret_max:
+              ret_max = ret_a
+            ret += (epsilon / float(self.num_actions(s))) * ret_a
+          v[s] = ret + (1.0 - epsilon) * ret_max
+        if abs(v[s] - vi[s]) > dv:
+          dv = abs(v[s] - vi[s])
+    return v
+
   # returns an array containing the optimal value function under the equiprobable random policy for an MDP
   def value_equiprobable(self, gamma, tolerance=1e-6):
     v = [0.0] * self.num_states()
@@ -141,6 +167,10 @@ class MDP:
   def Q_policy(self, P, gamma, tolerance=1e-6):
     return self.value_to_Q(self.value_policy(P, gamma, tolerance), gamma)
 
+  # returns an array Q[s][a] containing the optimal value function under the epsilon-greedy policy for an MDP
+  def Q_eps_greedy(self, epsilon, gamma, tolerance=1e-6):
+    return self.value_to_Q(self.value_eps_greedy(epsilon, gamma, tolerance), gamma)
+
   # returns an array Q[s][a] containing the optimal value function under the equiprobable random policy for an MDP
   def Q_equiprobable(self, gamma, tolerance=1e-6):
     return self.value_to_Q(self.value_equiprobable(gamma, tolerance), gamma)
@@ -155,6 +185,10 @@ class MDP:
           tr_i = self._mdp[s][a][tr]
           Q[s][a] += tr_i[2] * (tr_i[1] + gamma * v[tr_i[0]])
     return Q
+
+  # checks if a state is terminal
+  def terminal(self, state):
+    return self.num_actions(state) == 0
 
 def example():
   # create an MDP
@@ -175,8 +209,8 @@ def example():
   mdp.add_transition(1, 0, (1, -1.0, 0.4))
 
   # output optimal state-value and action-value functions with discount rate 0.9
-  print 'V[s]   ', mdp.value_iteration(0.9)
-  print 'Q[s][a]', mdp.Q_iteration(0.9)
+  print('V[s]   ', mdp.value_iteration(0.9))
+  print('Q[s][a]', mdp.Q_iteration(0.9))
 
 if __name__ == '__main__':
   example()
