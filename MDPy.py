@@ -149,7 +149,7 @@ class MDP(object):
 
   # returns action-values Q[s][a] under a tempered-softmax policy for the MDP
   def Q_softmax(self, tau, gamma, tolerance=1e-6):
-    pi = lambda Q, s: np.exp((Q - np.max(Q)) / tau) / np.exp((Q - np.max(Q)) / tau).sum()#[np.exp((Q[i] - np.max(Q)) / tau) / np.sum(np.exp((Q - np.max(Q)) / tau)) for i in range(len(Q))]
+    pi = lambda Q, s: np.exp((Q - np.max(Q)) / tau) / np.exp((Q - np.max(Q)) / tau).sum()
     return self.Q_policy(pi, gamma, tolerance)
 
   # returns action-values Q[s][a] under a mellowmax policy for the MDP
@@ -185,7 +185,6 @@ def example():
   # output optimal state-value and action-value functions with discount rate 0.9
   print('V[s]   ', mdp.value_iteration(0.9))
   print('Q[s][a]', mdp.Q_iteration(0.9))
-  print('Q[s][a]', mdp.Q_equiprobable(0.9))
 
 if __name__ == '__main__':
   example()
