@@ -117,8 +117,8 @@ class MDP(object):
     return self.value_policy(pi, gamma, tolerance)
 
   # returns action-values Q[s][a] under a policy P(Q[s], s) for an MDP
-  def Q_policy(self, policy, gamma, tolerance=1e-6):
-    Q = [[0.0 for a in range(self.num_actions(s))] for s in range(self.num_states())]
+  def Q_policy(self, policy, gamma, tolerance=1e-6, Q0=None):
+    Q = [[0.0 for a in range(self.num_actions(s))] for s in range(self.num_states())] if Q0 == None else Q0
     dv = tolerance
     while dv >= tolerance:
       dv = 0.0
@@ -134,27 +134,27 @@ class MDP(object):
     return Q
 
   # returns action-values Q[s][a] under a greedy policy for the MDP
-  def Q_iteration(self, gamma, tolerance=1e-6):
+  def Q_iteration(self, gamma, tolerance=1e-6, Q0=None):
     pi = lambda Q, s: [1 if i == np.argmax(Q) else 0 for i in range(len(Q))]
     return self.Q_policy(pi, gamma, tolerance)
 
   # returns action-values Q[s][a] under an epsilon-greedy policy for the MDP
-  def Q_eps_greedy(self, epsilon, gamma, tolerance=1e-6):
+  def Q_eps_greedy(self, epsilon, gamma, tolerance=1e-6, Q0=None):
     pi = lambda Q, s: [1 - epsilon + epsilon / len(Q) if i == np.argmax(Q) else epsilon / len(Q) for i in range(len(Q))]
     return self.Q_policy(pi, gamma, tolerance)
 
   # returns action-values Q[s][a] under an equiprobable random policy for the MDP
-  def Q_equiprobable(self, gamma, tolerance=1e-6):
+  def Q_equiprobable(self, gamma, tolerance=1e-6, Q0=None):
     pi = lambda Q, s: [1 / len(Q) for i in range(len(Q))]
     return self.Q_policy(pi, gamma, tolerance)
 
   # returns action-values Q[s][a] under a tempered-softmax policy for the MDP
-  def Q_softmax(self, tau, gamma, tolerance=1e-6):
+  def Q_softmax(self, tau, gamma, tolerance=1e-6, Q0=None):
     pi = lambda Q, s: np.exp((Q - np.max(Q)) / tau) / np.exp((Q - np.max(Q)) / tau).sum() if len(Q) > 0 else []
     return self.Q_policy(pi, gamma, tolerance)
 
   # returns action-values Q[s][a] under a mellowmax policy for the MDP
-  def Q_mellowmax(self, omega, gamma, tolerance=1e-6, a=-1000, b=1000):
+  def Q_mellowmax(self, omega, gamma, tolerance=1e-6, Q0=None, a=-1000, b=1000):
     def pi(Q, s):
       if len(Q) == 0: return []
       mm = np.max(Q) + np.log(np.exp(omega * (Q - np.max(Q))).mean()) / omega
