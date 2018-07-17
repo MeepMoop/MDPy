@@ -68,8 +68,8 @@ class MDP(object):
     return self._mdp[state][action][tr][:-1]
 
   # returns state-values V[s] under a policy P(Q[s], s) for an MDP
-  def value_policy(self, policy, gamma, tolerance=1e-6):
-    V = [0.0 for s in range(self.num_states())]
+  def value_policy(self, policy, gamma, tolerance=1e-6, V0=None):
+    V = [0.0 for s in range(self.num_states())] if V0 == None else V0
     dv = tolerance
     while dv >= tolerance:
       dv = 0.0
@@ -89,32 +89,32 @@ class MDP(object):
     return V
 
   # returns state-values V[s] under a greedy policy for the MDP
-  def value_iteration(self, gamma, tolerance=1e-6):
+  def value_iteration(self, gamma, tolerance=1e-6, V0=None):
     pi = lambda Q, s: [1 if i == np.argmax(Q) else 0 for i in range(len(Q))]
-    return self.value_policy(pi, gamma, tolerance)
+    return self.value_policy(pi, gamma, tolerance, V0)
 
   # returns state-values V[s] under an epsilon-greedy policy for the MDP
-  def value_eps_greedy(self, epsilon, gamma, tolerance=1e-6):
+  def value_eps_greedy(self, epsilon, gamma, tolerance=1e-6, V0=None):
     pi = lambda Q, s: [1 - epsilon + epsilon / len(Q) if i == np.argmax(Q) else epsilon / len(Q) for i in range(len(Q))]
-    return self.value_policy(pi, gamma, tolerance)
+    return self.value_policy(pi, gamma, tolerance, V0)
 
   # returns state-values V[s] under an equiprobable random policy for the MDP
-  def value_equiprobable(self, gamma, tolerance=1e-6):
+  def value_equiprobable(self, gamma, tolerance=1e-6, V0=None):
     pi = lambda Q, s: [1 / len(Q) for i in range(len(Q))]
-    return self.value_policy(pi, gamma, tolerance)
+    return self.value_policy(pi, gamma, tolerance, V0)
 
   # returns state-values V[s] under a tempered-softmax policy for the MDP
-  def value_softmax(self, tau, gamma, tolerance=1e-6):
+  def value_softmax(self, tau, gamma, tolerance=1e-6, V0=None):
     pi = lambda Q, s: np.exp((Q - np.max(Q)) / tau) / np.exp((Q - np.max(Q)) / tau).sum()
-    return self.value_policy(pi, gamma, tolerance)
+    return self.value_policy(pi, gamma, tolerance, V0)
 
   # returns state-values V[s] under a mellowmax policy for the MDP
-  def value_mellowmax(self, omega, gamma, tolerance=1e-6, a=-1000, b=1000):
+  def value_mellowmax(self, omega, gamma, tolerance=1e-6, V0=None, a=-1000, b=1000):
     def pi(Q, s):
       mm = np.max(Q) + np.log(np.exp(omega * (Q - np.max(Q))).mean()) / omega
       beta = scipy.optimize.brentq(lambda beta: np.sum(np.exp(beta * (Q - mm) - np.max(beta * (Q - mm))) * (Q - mm)), a=a, b=b)
       return np.exp(beta * (Q - np.max(Q))) / np.exp(beta * (Q - np.max(Q))).sum()
-    return self.value_policy(pi, gamma, tolerance)
+    return self.value_policy(pi, gamma, tolerance, V0)
 
   # returns action-values Q[s][a] under a policy P(Q[s], s) for an MDP
   def Q_policy(self, policy, gamma, tolerance=1e-6, Q0=None):
@@ -136,22 +136,22 @@ class MDP(object):
   # returns action-values Q[s][a] under a greedy policy for the MDP
   def Q_iteration(self, gamma, tolerance=1e-6, Q0=None):
     pi = lambda Q, s: [1 if i == np.argmax(Q) else 0 for i in range(len(Q))]
-    return self.Q_policy(pi, gamma, tolerance)
+    return self.Q_policy(pi, gamma, tolerance, Q0)
 
   # returns action-values Q[s][a] under an epsilon-greedy policy for the MDP
   def Q_eps_greedy(self, epsilon, gamma, tolerance=1e-6, Q0=None):
     pi = lambda Q, s: [1 - epsilon + epsilon / len(Q) if i == np.argmax(Q) else epsilon / len(Q) for i in range(len(Q))]
-    return self.Q_policy(pi, gamma, tolerance)
+    return self.Q_policy(pi, gamma, tolerance, Q0)
 
   # returns action-values Q[s][a] under an equiprobable random policy for the MDP
   def Q_equiprobable(self, gamma, tolerance=1e-6, Q0=None):
     pi = lambda Q, s: [1 / len(Q) for i in range(len(Q))]
-    return self.Q_policy(pi, gamma, tolerance)
+    return self.Q_policy(pi, gamma, tolerance, Q0)
 
   # returns action-values Q[s][a] under a tempered-softmax policy for the MDP
   def Q_softmax(self, tau, gamma, tolerance=1e-6, Q0=None):
     pi = lambda Q, s: np.exp((Q - np.max(Q)) / tau) / np.exp((Q - np.max(Q)) / tau).sum() if len(Q) > 0 else []
-    return self.Q_policy(pi, gamma, tolerance)
+    return self.Q_policy(pi, gamma, tolerance, Q0)
 
   # returns action-values Q[s][a] under a mellowmax policy for the MDP
   def Q_mellowmax(self, omega, gamma, tolerance=1e-6, Q0=None, a=-1000, b=1000):
@@ -160,7 +160,7 @@ class MDP(object):
       mm = np.max(Q) + np.log(np.exp(omega * (Q - np.max(Q))).mean()) / omega
       beta = scipy.optimize.brentq(lambda beta: np.sum(np.exp(beta * (Q - mm) - np.max(beta * (Q - mm))) * (Q - mm)), a=a, b=b)
       return np.exp(beta * (Q - np.max(Q))) / np.exp(beta * (Q - np.max(Q))).sum()
-    return self.Q_policy(pi, gamma, tolerance)
+    return self.Q_policy(pi, gamma, tolerance, Q0)
 
   # checks if a state is terminal
   def is_terminal(self, state):
