@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import numpy as np
+import copy
 import scipy.optimize
 
 class MDP(object):
@@ -72,19 +73,19 @@ class MDP(object):
     dv = tolerance
     while dv >= tolerance:
       dv = 0.0
+      Vold = copy.deepcopy(V)
       for s in range(self.num_states()):
         if self.num_actions(s) == 0:
           continue
-        Vold = V[s]
         Q = np.zeros(self.num_actions(s))
         for a in range(self.num_actions(s)):
           ret = 0.0
           for tr in self._mdp[s][a]:
-            ret += tr[2] * (tr[1] + gamma * V[tr[0]])
+            ret += tr[2] * (tr[1] + gamma * Vold[tr[0]])
           Q[a] = ret
         V[s] = np.dot(policy(Q, s), Q)
-        if abs(V[s] - Vold) > dv:
-          dv = abs(V[s] - Vold)
+        if abs(V[s] - Vold[s]) > dv:
+          dv = abs(V[s] - Vold[s])
     return V
 
   # returns state-values V[s] under a greedy policy for the MDP
@@ -121,15 +122,15 @@ class MDP(object):
     dv = tolerance
     while dv >= tolerance:
       dv = 0.0
+      Qold = copy.deepcopy(Q)
       for s in range(self.num_states()):
         for a in range(self.num_actions(s)):
-          Qold = Q[s][a]
           ret = 0.0
           for tr in self._mdp[s][a]:
-            ret += tr[2] * (tr[1] + gamma * np.dot(policy(Q[tr[0]], tr[0]), Q[tr[0]]))
+            ret += tr[2] * (tr[1] + gamma * np.dot(policy(Qold[tr[0]], tr[0]), Qold[tr[0]]))
           Q[s][a] = ret
-          if abs(Q[s][a] - Qold) > dv:
-            dv = abs(Q[s][a] - Qold)
+          if abs(Q[s][a] - Qold[s][a]) > dv:
+            dv = abs(Q[s][a] - Qold[s][a])
     return Q
 
   # returns action-values Q[s][a] under a greedy policy for the MDP
@@ -149,12 +150,13 @@ class MDP(object):
 
   # returns action-values Q[s][a] under a tempered-softmax policy for the MDP
   def Q_softmax(self, tau, gamma, tolerance=1e-6):
-    pi = lambda Q, s: np.exp((Q - np.max(Q)) / tau) / np.exp((Q - np.max(Q)) / tau).sum()
+    pi = lambda Q, s: np.exp((Q - np.max(Q)) / tau) / np.exp((Q - np.max(Q)) / tau).sum() if len(Q) > 0 else []
     return self.Q_policy(pi, gamma, tolerance)
 
   # returns action-values Q[s][a] under a mellowmax policy for the MDP
   def Q_mellowmax(self, omega, gamma, tolerance=1e-6, a=-1000, b=1000):
     def pi(Q, s):
+      if len(Q) == 0: return []
       mm = np.max(Q) + np.log(np.exp(omega * (Q - np.max(Q))).mean()) / omega
       beta = scipy.optimize.brentq(lambda beta: np.sum(np.exp(beta * (Q - mm) - np.max(beta * (Q - mm))) * (Q - mm)), a=a, b=b)
       return np.exp(beta * (Q - np.max(Q))) / np.exp(beta * (Q - np.max(Q))).sum()
