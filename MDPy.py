@@ -79,10 +79,8 @@ class MDP(object):
           continue
         Q = np.zeros(self.num_actions(s))
         for a in range(self.num_actions(s)):
-          ret = 0.0
           for tr in self._mdp[s][a]:
-            ret += tr[2] * (tr[1] + gamma * Vold[tr[0]])
-          Q[a] = ret
+            Q[a] += tr[2] * (tr[1] + gamma * Vold[tr[0]])
         V[s] = np.dot(policy(Q, s), Q)
         if abs(V[s] - Vold[s]) > dv:
           dv = abs(V[s] - Vold[s])
@@ -105,12 +103,13 @@ class MDP(object):
 
   # returns state-values V[s] under a tempered-softmax policy for the MDP
   def value_softmax(self, tau, gamma, tolerance=1e-6, V0=None):
-    pi = lambda Q, s: np.exp((Q - np.max(Q)) / tau) / np.exp((Q - np.max(Q)) / tau).sum()
+    pi = lambda Q, s: np.exp((Q - np.max(Q)) / tau) / np.exp((Q - np.max(Q)) / tau).sum() if len(Q) > 0 else []
     return self.value_policy(pi, gamma, tolerance, V0)
 
   # returns state-values V[s] under a mellowmax policy for the MDP
   def value_mellowmax(self, omega, gamma, tolerance=1e-6, V0=None, a=-1000, b=1000):
     def pi(Q, s):
+      if len(Q) == 0: return []
       mm = np.max(Q) + np.log(np.exp(omega * (Q - np.max(Q))).mean()) / omega
       beta = scipy.optimize.brentq(lambda beta: np.sum(np.exp(beta * (Q - mm) - np.max(beta * (Q - mm))) * (Q - mm)), a=a, b=b)
       return np.exp(beta * (Q - np.max(Q))) / np.exp(beta * (Q - np.max(Q))).sum()
