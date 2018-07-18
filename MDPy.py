@@ -124,10 +124,9 @@ class MDP(object):
       Qold = copy.deepcopy(Q)
       for s in range(self.num_states()):
         for a in range(self.num_actions(s)):
-          ret = 0.0
+          Q[s][a] = 0.0
           for tr in self._mdp[s][a]:
-            ret += tr[2] * (tr[1] + gamma * np.dot(policy(Qold[tr[0]], tr[0]), Qold[tr[0]]))
-          Q[s][a] = ret
+            Q[s][a] += tr[2] * (tr[1] + gamma * np.dot(policy(Qold[tr[0]], tr[0]), Qold[tr[0]]))
           if abs(Q[s][a] - Qold[s][a]) > dv:
             dv = abs(Q[s][a] - Qold[s][a])
     return Q
